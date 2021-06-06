@@ -51,6 +51,7 @@ public class SampleCommand extends InteractionCommand {
         //For message acknowledge(event, InteractionResponseType.Message, message.asRequest());
 
         //The message can be deleted, an example is below, the duration is freely selectable (The message "Some result" will delete after 10 Seconds)
+        //The Ephemeral acknowledgeEphemeral methods are messages they are only for the command user visible
         return acknowledgeWithDeleteTime(event, InteractionResponseType.Text, text, Duration.ofSeconds(10));
     }
 
