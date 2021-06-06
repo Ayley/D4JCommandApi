@@ -25,6 +25,7 @@ public class SampleBot {
         discordClient.getEventDispatcher().on(new SampleCommand(restClient, applicationId, guildId)).subscribe();
 
         //For global slash command
+        //Do not forget that global slash commands are not immediately available with guilds and can only be used after a while after the bot has been online (up to one hour)
         discordClient.getEventDispatcher().on(new SampleCommand(restClient, applicationId)).subscribe();
 
         discordClient.onDisconnect().block();
