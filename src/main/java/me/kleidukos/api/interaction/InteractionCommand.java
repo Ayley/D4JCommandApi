@@ -85,6 +85,28 @@ public abstract class InteractionCommand extends ReactiveEventAdapter {
         return result;
     }
 
+    public final Mono<? extends MessageData> acknowledgeEphemeral(InteractionCreateEvent event, InteractionResponseType type, Object message) {
+        Mono<? extends MessageData> data = switch (type) {
+            case Embed -> InteractionResponseAnswer.sendEmbed(this, event, (EmbedData) message);
+            case Text -> InteractionResponseAnswer.sendText(this, event, (String) message);
+            case Message -> InteractionResponseAnswer.sendMessage(this, event, (MultipartRequest) message);
+        };
+        return event.acknowledgeEphemeral().then(data);
+    }
+
+    public final Mono<? extends MessageData> acknowledgeWithDeleteTimeEphemeral(InteractionCreateEvent event, InteractionResponseType type, Object message, Duration duration) {
+        Mono<? extends MessageData> data = switch (type) {
+            case Embed -> InteractionResponseAnswer.sendEmbed(this, event, (EmbedData) message);
+            case Text -> InteractionResponseAnswer.sendText(this, event, (String) message);
+            case Message -> InteractionResponseAnswer.sendMessage(this, event, (MultipartRequest) message);
+        };
+        Mono<? extends MessageData> result = event.acknowledgeEphemeral().then(data);
+
+        Mono.delay(duration).then(event.getInteractionResponse().deleteInitialResponse()).subscribe();
+
+        return result;
+    }
+
     public RestClient getRestClient() {
         return restClient;
     }
