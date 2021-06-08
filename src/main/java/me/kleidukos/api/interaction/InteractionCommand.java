@@ -2,15 +2,17 @@ package me.kleidukos.api.interaction;
 
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.InteractionCreateEvent;
-import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.discordjson.json.EmbedData;
-import discord4j.discordjson.json.MessageData;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Color;
 import discord4j.rest.util.MultipartRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public abstract class InteractionCommand extends ReactiveEventAdapter {
 
@@ -63,21 +65,10 @@ public abstract class InteractionCommand extends ReactiveEventAdapter {
         }
     }
 
-    public final Mono<? extends MessageData> acknowledge(InteractionCreateEvent event, InteractionResponseType type, Object message) {
-        Mono<? extends MessageData> data = switch (type) {
-            case Embed -> InteractionResponseAnswer.sendEmbed(this, event, (EmbedData) message);
-            case Text -> InteractionResponseAnswer.sendText(this, event, (String) message);
-            case Message -> InteractionResponseAnswer.sendMessage(this, event, (MultipartRequest) message);
-        };
-        return event.acknowledge().then(data);
-    }
+    public final Mono<? extends MessageData> acknowledgeDelete(InteractionCreateEvent event, String message, Duration duration) {
 
-    public final Mono<? extends MessageData> acknowledgeWithDeleteTime(InteractionCreateEvent event, InteractionResponseType type, Object message, Duration duration) {
-        Mono<? extends MessageData> data = switch (type) {
-            case Embed -> InteractionResponseAnswer.sendEmbed(this, event, (EmbedData) message);
-            case Text -> InteractionResponseAnswer.sendText(this, event, (String) message);
-            case Message -> InteractionResponseAnswer.sendMessage(this, event, (MultipartRequest) message);
-        };
+        Mono<? extends MessageData> data = InteractionResponseAnswer.sendText(event, message);
+
         Mono<? extends MessageData> result = event.acknowledge().then(data);
 
         Mono.delay(duration).then(event.getInteractionResponse().deleteInitialResponse()).subscribe();
@@ -85,26 +76,50 @@ public abstract class InteractionCommand extends ReactiveEventAdapter {
         return result;
     }
 
-    public final Mono<? extends MessageData> acknowledgeEphemeral(InteractionCreateEvent event, InteractionResponseType type, Object message) {
-        Mono<? extends MessageData> data = switch (type) {
-            case Embed -> InteractionResponseAnswer.sendEmbed(this, event, (EmbedData) message);
-            case Text -> InteractionResponseAnswer.sendText(this, event, (String) message);
-            case Message -> InteractionResponseAnswer.sendMessage(this, event, (MultipartRequest) message);
-        };
-        return event.acknowledgeEphemeral().then(data);
-    }
+    public final Mono<? extends MessageData> acknowledgeDelete(InteractionCreateEvent event, EmbedCreateSpec embed, Duration duration) {
 
-    public final Mono<? extends MessageData> acknowledgeWithDeleteTimeEphemeral(InteractionCreateEvent event, InteractionResponseType type, Object message, Duration duration) {
-        Mono<? extends MessageData> data = switch (type) {
-            case Embed -> InteractionResponseAnswer.sendEmbed(this, event, (EmbedData) message);
-            case Text -> InteractionResponseAnswer.sendText(this, event, (String) message);
-            case Message -> InteractionResponseAnswer.sendMessage(this, event, (MultipartRequest) message);
-        };
-        Mono<? extends MessageData> result = event.acknowledgeEphemeral().then(data);
+        Mono<? extends MessageData> data = InteractionResponseAnswer.sendEmbed(this, event, embed.asRequest());
+
+        Mono<? extends MessageData> result = event.acknowledge().then(data);
 
         Mono.delay(duration).then(event.getInteractionResponse().deleteInitialResponse()).subscribe();
 
         return result;
+    }
+
+    public final Mono<? extends MessageData> acknowledgeDelete(InteractionCreateEvent event, MessageCreateSpec message, Duration duration) {
+
+        Mono<? extends MessageData> data = InteractionResponseAnswer.sendMessage(this, event, message.asRequest());
+
+        Mono<? extends MessageData> result = event.acknowledge().then(data);
+
+        Mono.delay(duration).then(event.getInteractionResponse().deleteInitialResponse()).subscribe();
+
+        return result;
+    }
+
+    public final Mono<?> acknowledgeEphemeral(InteractionCreateEvent event, String message) {
+        return event.reply(spec -> spec.setContent(message).setEphemeral(true));
+    }
+
+    public final Mono<?> acknowledgeEphemeral(InteractionCreateEvent event, EmbedCreateSpec embedCreateSpec) {
+        return event.reply(spec -> spec.addEmbed(embed -> embed = embedCreateSpec).setEphemeral(true));
+    }
+
+    public final Mono<?> acknowledgeEphemeral(InteractionCreateEvent event, String message, EmbedCreateSpec embedCreateSpec) {
+        return event.reply(spec -> spec.setContent(Objects.requireNonNull(message)).addEmbed(embed -> embed = embedCreateSpec).setEphemeral(true));
+    }
+
+    public final Mono<?> acknowledge(InteractionCreateEvent event, String message) {
+        return event.reply(spec -> spec.setContent(message));
+    }
+
+    public final Mono<?> acknowledge(InteractionCreateEvent event, EmbedCreateSpec embedCreateSpec) {
+        return event.reply(spec -> spec.addEmbed(embed -> embed = embedCreateSpec));
+    }
+
+    public final Mono<?> acknowledge(InteractionCreateEvent event, String message, EmbedCreateSpec embedCreateSpec) {
+        return event.reply(spec -> spec.setContent(Objects.requireNonNull(message)).addEmbed(embed -> embed = embedCreateSpec));
     }
 
     public RestClient getRestClient() {

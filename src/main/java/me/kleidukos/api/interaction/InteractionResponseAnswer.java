@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 
 final class InteractionResponseAnswer {
 
-    public static Mono<MessageData> sendText(InteractionCommand command, InteractionCreateEvent event, String content) {
+    public static Mono<MessageData> sendText(InteractionCreateEvent event, String content) {
         return event.getInteractionResponse().createFollowupMessage(content);
     }
 

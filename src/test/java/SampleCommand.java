@@ -1,6 +1,4 @@
 import discord4j.core.event.domain.InteractionCreateEvent;
-import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -8,7 +6,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.ApplicationCommandOptionType;
 import me.kleidukos.api.interaction.InteractionCommand;
-import me.kleidukos.api.interaction.InteractionResponseType;
 import org.reactivestreams.Publisher;
 
 import java.time.Duration;
@@ -45,14 +42,10 @@ public class SampleCommand extends InteractionCommand {
 
         message.setEmbed(embedCreateSpec -> embedCreateSpec = embed);
 
-        //Answer on command
-        //For simple Text acknowledge(event, InteractionResponseType.Text, text);
-        //For embed acknowledge(event, InteractionResponseType.Embed, embed.asRequest());
-        //For message acknowledge(event, InteractionResponseType.Message, message.asRequest());
 
         //The message can be deleted, an example is below, the duration is freely selectable (The message "Some result" will delete after 10 Seconds)
         //The Ephemeral acknowledgeEphemeral methods are messages they are only for the command user visible
-        return acknowledgeWithDeleteTime(event, InteractionResponseType.Text, text, Duration.ofSeconds(10));
+        return acknowledgeDelete(event, text, Duration.ofSeconds(10));
     }
 
     @Override
