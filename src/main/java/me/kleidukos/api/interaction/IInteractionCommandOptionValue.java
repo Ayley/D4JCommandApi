@@ -9,13 +9,22 @@ import reactor.core.publisher.Mono;
 public interface IInteractionCommandOptionValue {
 
     String getOptionRawValue(String name);
+
     String getOptionValueAsString(String name);
+
     boolean getOptionValueAsBoolean(String name);
+
     long getOptionValueAsLong(String name);
+
     Snowflake getOptionValueAsSnowflake(String name);
+
     Mono<User> getOptionValueAsUser(String name);
+
     Mono<Role> getOptionValueAsRole(String name);
+
     Mono<Channel> getOptionValueAsChannel(String name);
+
     Object getOptionValueAsObject(String name);
+
     boolean isOptionValuePresent(String name);
 }

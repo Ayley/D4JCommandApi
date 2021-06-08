@@ -23,7 +23,7 @@ public abstract class InteractionCommand extends ReactiveEventAdapter {
         this.guildId = guildId;
         this.name = name;
         this.optionValue = new InteractionCommandOptionValue();
-        this.response = new InteractionResponse(this);
+        this.response = new InteractionResponse();
 
         registerCommand();
     }
